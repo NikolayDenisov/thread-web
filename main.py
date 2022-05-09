@@ -1,8 +1,9 @@
 import datetime
 
 from flask_socketio import *
+import logging
 
-from SECRET import SECRET_KEY
+from CONFIG import SECRET_KEY
 from CONFIG import SERVER_HOST, SERVER_PORT
 
 app = flask.Flask(__name__, static_folder="/static", static_url_path="/static", template_folder="/templates")
@@ -66,6 +67,8 @@ def commission():
 
 
 def main():
+    logging.basicConfig(level=logging.INFO)
+    logging.getLogger("thread-web").setLevel(logging.DEBUG)
     socketio.run(app=app, host=SERVER_HOST, debug=True, port=SERVER_PORT, use_reloader=False)
 
 
