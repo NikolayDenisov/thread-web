@@ -1,80 +1,73 @@
-"""
-Methods
-1. Register. POST
-Register an app user Platform. This endpoint also logs the user in (returns the session token and roles), so you don't have to do another API call to log him in.
-@:param str email: The user's email address
-@:param str email: A hard to guess password
-@:param str app: The appID given in the panel
+import datetime
 
-2. Login. POST.
-Login an app user at Platform.
-Returns the session token and roles.
-The object "roles" identifies the resources and things that the user has authorized the app to access.
-@:param str email: The user's email address
-@:param str email: A hard to guess password
-@:param str app: The appID given in the panel
+from flask_socketio import *
 
-3. Link thing. POST
-me/things
-Before getting the user's data from a thing, a procedure called link thing is necessary, which allows the platform to know that the user is the owner of the thing.
-@:param str thingToken: THING_TOKEN
-@:param str Authorization: SESSION_TOKEN
+from SECRET import SECRET_KEY
+from CONFIG import SERVER_HOST, SERVER_PORT
 
-4. Get resources. GET
-me/resources
-Get the user's resources and the things associated to each resource.
-@:param str Authorization: SESSION_TOKEN
+app = flask.Flask(__name__, static_folder="/static", static_url_path="/static", template_folder="/templates")
+app.config['SECRET_KEY'] = SECRET_KEY
+socketio = SocketIO(app)
 
-5. Get resource values
-me/resources/{RESOURCE}
-This endpoint returns the values of the specified resource.
-@:param str RESOURCE:
-@:param int limit: Max. number of values to be returned (Max.: 100)
-@:param str startDate: The min date (format: YYYYMMDDHHmmss). The default is Jan 1st 1970.
-@:param str endDate: The max date (format: YYYYMMDDHHmmss). The default is the end of times (javascript).
-@:param str Authorization: SESSION_TOKEN
 
-6. Get User Settings. GET
-me/settings
-Sometimes the app needs to store additional data about the user like name, company.
-In that case the app can use the endpoint '/me/settings' in order to set and get the user’s settings.
-The user’s settings are not meant to store large amounts of data. It’s more likely a small key/value store.
-@:param str Authorization:SESSION_TOKEN
+@app.route('/')
+def index():
+    return flask.render_template('index.html', name='index')
 
-7. Update User Settings. PUT
-me/settings
-@:param json Settings: Settings JSON
-@:param str Authorization:SESSION_TOKEN
 
-8. Get Server Date. GET
-utils/date/?format={FORMAT}
-Retrieve the date of the server. The parameter format accepts two values: 'UTC' and 'unix_timestamp'.
-@:param str FORMAT: Accepts two values: 'UTC' and 'unix_timestamp'.
-@:param json: Settings JSON
+@app.route('/settings')
+def settings():
+    return flask.render_template('settings.html', name='settings')
 
-TODO: Firmware Over-The-Air (OTA) update
-TODO: Cloud Code Triggers
 
-9. Available Thread Networks
+@app.route('/login')
+def login():
+    return flask.render_template('login.html', name='login')
 
-10. Join Thread Networks
 
-11.Form Thread Networks
-@:param str Network Name:
-@:param str PAN ID:
-@:param str Network Ext PAN ID:
-@:param str Network Key:
-@:param str Channel
-@:param str On-Mesh Prefix:
-@:param bool Default Route:
+@app.route('/register')
+def login():
+    return flask.render_template('register.html', name='register')
 
-12. Status
 
-13. Settings
-@:param str On-Mesh Prefix:
-@:param bool Default Route:
+@app.route('/things')
+def things():
+    return flask.render_template('things.html', name='things')
 
-14. Commission
-@:param str Network Passphrase
-@:param str Joiner PSKd
-"""
+
+@app.route('/resources')
+def things():
+    return flask.render_template('resources.html', name='resources')
+
+
+@app.route('/networks')
+def networks():
+    return flask.render_template('networks.html', name='networks')
+
+
+@app.route('/join')
+def join():
+    return flask.render_template('join.html', name='join')
+
+
+@app.route('/form')
+def form():
+    return flask.render_template('form.html', name='form')
+
+
+@app.route('/status')
+def status():
+    return flask.render_template('status.html', name='status')
+
+
+@app.route('/commission')
+def commission():
+    return flask.render_template('commission.html', name='commission')
+
+
+def main():
+    socketio.run(app=app, host=SERVER_HOST, debug=True, port=SERVER_PORT, use_reloader=False)
+
+
+if __name__ == "__main__":
+    main()
