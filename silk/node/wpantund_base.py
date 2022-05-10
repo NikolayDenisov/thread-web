@@ -1,7 +1,22 @@
+# Copyright 2019 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import random
 
-from silk import wpan_constants as wpan
-from node import WpanNode
+import silk.hw.hw_resource
+from silk.config import wpan_constants as wpan
+from silk.node import wpan_node
 
 
 def role_is_thread(role):
@@ -10,7 +25,7 @@ def role_is_thread(role):
     return role in [2, 3, 4]
 
 
-class WpantundWpanNode(WpanNode):
+class WpantundWpanNode(wpan_node.WpanNode):
     """
     This is the base class for controlling interactions with wpantund. This should provide a flexible overlay that
     can be ported to control Nordic, SiLabs dev boards, and any other dev board connected to a Linux machine
@@ -44,6 +59,13 @@ class WpantundWpanNode(WpanNode):
         """Implemented by inheriting class.
         """
         pass
+
+    def free_device(self):
+        """Free up hardware resources consumed by this class.
+        """
+        silk.hw.hw_resource.global_instance().free_hw_module(self.device)
+        self.device = None
+        self.device_path = None
 
     def clear_state(self):
         self.store_data(None, self.role_label)
@@ -171,7 +193,7 @@ class WpantundWpanNode(WpanNode):
         self.store_data(role, self.role_label)
 
         join_command = "join %s -T %s -c %s -x %s -p 0x%x" % \
-                       (network.name, role, network.channel, network.xpanid, network.panid)
+            (network.name, role, network.channel, network.xpanid, network.panid)
 
         self.wpanctl_async("join", join_command, "Successfully Joined!", 60)
 
@@ -191,7 +213,7 @@ class WpantundWpanNode(WpanNode):
         self.store_data(role, self.role_label)
 
         join_command = "join %s -T %s -c %s -x %s -p 0x%x" % \
-                       (network.name, role, network.channel, network.xpanid, network.panid)
+            (network.name, role, network.channel, network.xpanid, network.panid)
 
         # Join to provisionally-joined state
         self.wpanctl_async("join", join_command,
@@ -219,7 +241,7 @@ class WpantundWpanNode(WpanNode):
         self.store_data(role, self.role_label)
 
         join_command = "join %s -T %s -c %s -x %s -p 0x%x" % \
-                       (network.name, role, network.channel, network.xpanid, network.panid)
+            (network.name, role, network.channel, network.xpanid, network.panid)
 
         if should_set_key:
             command = "setprop Network:Key --data %s" % network.psk
@@ -278,7 +300,7 @@ class WpantundWpanNode(WpanNode):
 
         return self.wpanctl(
             "permit-join", "permit-join" + (" {}".format(duration_sec) if duration_sec is not None else "") +
-                           (" {}".format(port) if port is not None else "") + traffic_type, 5)
+            (" {}".format(port) if port is not None else "") + traffic_type, 5)
 
     def perform_active_scan(self, channel=None):
         """Tell the NCP to scan for other networks.
@@ -311,7 +333,7 @@ class WpantundWpanNode(WpanNode):
     def config_gateway1(self, prefix, default_route=False, priority=None):
         return self.wpanctl(
             "config-gateway", "config-gateway " + prefix + (" -d" if default_route else "") +
-                              (" -P {}".format(priority) if priority is not None else ""), 20)
+            (" -P {}".format(priority) if priority is not None else ""), 20)
 
     def add_prefix(self,
                    prefix,
@@ -327,10 +349,9 @@ class WpantundWpanNode(WpanNode):
 
         return self.wpanctl(
             "add-prefix", "add-prefix " + prefix + (" -l {}".format(prefix_len) if prefix_len is not None else "") +
-                          (" -P {}".format(priority) if priority is not None else "") + (" -s" if stable else "") +
-                          (" -f" if preferred else "") + (" -a" if slaac else "") + (" -d" if dhcp else "") +
-                          (" -c" if configure else "") + (" -r" if default_route else "") + (" -o" if on_mesh else ""),
-            20)
+            (" -P {}".format(priority) if priority is not None else "") + (" -s" if stable else "") +
+            (" -f" if preferred else "") + (" -a" if slaac else "") + (" -d" if dhcp else "") +
+            (" -c" if configure else "") + (" -r" if default_route else "") + (" -o" if on_mesh else ""), 20)
 
     def remove_prefix(self, prefix, prefix_len=None):
         return self.wpanctl(
@@ -437,7 +458,7 @@ class WpantundWpanNode(WpanNode):
         command += " %s -c %s -s %s -W 10" % (ipv6_target, num_pings, payload_size)
 
         search_string = r"(?P<%s>[\d]+) packets transmitted, (?P<%s>[\d]+) received" \
-                        % (self.ping6_sent_label, self.ping6_received_label)
+            % (self.ping6_sent_label, self.ping6_received_label)
 
         fields = [self.ping6_sent_label, self.ping6_received_label]
 
@@ -459,7 +480,7 @@ class WpantundWpanNode(WpanNode):
         command += " %s -c %s -s %s -W 2" % (ipv6_target, num_pings, payload_size)
 
         search_string = r"rtt min/avg/max/mdev = \d+\.\d+/(?P<%s>\d+\.\d+)/\d+\.\d+/\d+\.\d+ ms" \
-                        % self.ping6_round_trip_time_label
+                % self.ping6_round_trip_time_label
 
         fields = [self.ping6_round_trip_time_label]
 

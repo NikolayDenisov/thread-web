@@ -14,8 +14,8 @@
 """Base node profile for 6LowPAN networks (Thread, CIP).
 """
 
-import base_node
-from base_node import not_implemented
+from . import base_node
+from .base_node import not_implemented
 import silk.postprocessing.wpan as mp_wpan
 import silk.tools.watchable as watchable
 

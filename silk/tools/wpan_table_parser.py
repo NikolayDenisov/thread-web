@@ -15,7 +15,7 @@
 import re
 
 from . import wpan_util
-from silk import wpan_constants as wpan
+from silk.config import wpan_constants as wpan
 
 
 def is_associated(sed):
