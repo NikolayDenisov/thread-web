@@ -10,11 +10,12 @@ from silk.device.netns_base import NetnsController
 from silk.node.wpantund_base import role_is_thread
 from silk.node.wpantund_base import WpantundWpanNode
 
-from silk.utils.jsonfile import JsonFile
 from silk.utils.network import get_local_ip
+import silk.hw.hw_module as hw_module
+import silk.hw.hw_resource as hw_resource
 
 import silk.config.defaults as defaults
-
+from silk.tools import wpan_table_parser
 
 LOG_PATH = "/opt/openthread_test/results/"
 POSIX_PATH = "/opt/openthread_test/posix"
@@ -37,7 +38,9 @@ class FifteenFourDevBoardNode(WpantundWpanNode, NetnsController):
                  device_path=None):
         self.logger = None
         self.wpantund_logger = None
-        self.netns = None
+        #TODO: fix getting netns
+        # self.netns = None
+        self.netns = 'wpan0'
         self.wpantund_process = None
         self.wpantund_monitor = None
         self.virtual_link_peer = None
@@ -70,15 +73,16 @@ class FifteenFourDevBoardNode(WpantundWpanNode, NetnsController):
             raise EnvironmentError
 
         # Acquire necessary hardware
-        # self.device = device
-        # self.device_path = device_path
+        self.device = device
+        self.device_path = device_path
+        #TODO: fix it
         # if self.device is None and self.device_path is None:
         #     if not virtual:
         #         self.get_device(sw_version=sw_version)
         #     else:
         #         self.get_unclaimed_device(virtual_name)
         # super().__init__(self.device.name())
-        #
+
         # self.log_info(f"Device interface: {self.device.interface_serial()}")
         # if not virtual:
         #     self.log_info(f"Device Path: {self.device_path}")
@@ -211,13 +215,35 @@ class FifteenFourDevBoardNode(WpantundWpanNode, NetnsController):
         """Make a system call into wpanctl inside the network namespace.
         Return the response
         """
+        print('wpanctl')
         wpanctl_command = defaults.WPANCTL_PATH + f" -I {self.netns} "
         wpanctl_command += command
         output = self.make_netns_call(wpanctl_command, timeout)
         return output
 
+    _hw_model = hw_module.HW_NRF52840
 
+    def get_device(self, name=None, sw_version=None):
+        """Find an unused dev board, or other hardware.
+        """
+        try:
+            self.device = hw_resource.global_instance().get_hw_module(hw_module.HW_NRF52840,
+                                                                      name=name,
+                                                                      sw_version=sw_version)
+            self.hwModel = hw_module.HW_NRF52840
+        except Exception:
+            try:
+                self.device = hw_resource.global_instance().get_hw_module(hw_module.HW_EFR32,
+                                                                          name=name,
+                                                                          sw_version=sw_version)
+                self.hwModel = hw_module.HW_EFR32
+            except Exception as error:
+                self.log_critical("Cannot find nRF52840 or efr32 Dev. board!! Error: %s" % error)
+
+        self.device_path = self.device.port()
 
 if __name__ == '__main__':
+    scan_result = []
     scanner = FifteenFourDevBoardNode()
-    scanner.get_active_scan(15)
+    scan_result.append(wpan_table_parser.parse_scan_result(scanner.get_active_scan(15)))
+    print(scan_result)

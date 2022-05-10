@@ -15,5 +15,5 @@
 """
 
 DEFAULT_LOG_OUTPUT_DIRECTORY = "/tmp/silk"
-WPANTUND_PATH = "/usr/local/sbin/wpantund"
-WPANCTL_PATH = "/usr/local/bin/wpanctl"
+WPANTUND_PATH = "/usr/sbin/wpantund"
+WPANCTL_PATH = "/usr/bin/wpanctl"

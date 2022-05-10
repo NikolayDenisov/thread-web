@@ -136,7 +136,6 @@ class SystemCallManager(object):
     def _make_system_call(self, action, command, timeout):
         """Generic method for making a system call with timeout.
         """
-
         log_line = "Making system call for %s" % action
         self.log_debug(log_line)
         self.log_debug(command)
