@@ -14,6 +14,9 @@
 
 # wpantund properties
 
+WPAN_DRIVERNAME = "Config:NCP:DriverName"
+WPAN_DAEMON_ENABLED = "Daemon:Enabled"
+WPAN_DAEMON_VERSION = "Daemon:Version"
 WPAN_STATE = "NCP:State"
 WPAN_NAME = "Network:Name"
 WPAN_PANID = "Network:PANID"

@@ -15,9 +15,9 @@ socketio = SocketIO(app)
 
 @app.route('/')
 def index():
-    scanner = DevBoardNode()
-    scan_result = wpan_table_parser.parse_scan_result(scanner.get_active_scan(DEFAULT_PORT))
-    return flask.render_template('thread_networks.html', name='index', scan_result=scan_result)
+    router = DevBoardNode()
+    scan_result = wpan_table_parser.parse_scan_result(router.get_active_scan(DEFAULT_PORT))
+    return flask.render_template('thread_networks.html', title='Available Thread Networks', name='index', scan_result=scan_result)
 
 
 @app.route('/settings')
@@ -62,7 +62,17 @@ def form():
 
 @app.route('/status')
 def status():
-    return flask.render_template('status.html', name='status')
+    router = DevBoardNode()
+    status = router.wpanctl("get", "status", 2)
+    # Example of expected text:
+    #
+    # `wpan0 => [\n
+    # \t"NCP:State" => "associated"\n
+    # \t"Daemon:Enabled" => true\n
+    # ]'
+    #
+    status_result = wpan_table_parser.StatusResult(status)
+    return flask.render_template('status.html', name='node', status_result=status_result)
 
 
 @app.route('/commission')

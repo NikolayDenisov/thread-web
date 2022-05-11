@@ -561,3 +561,41 @@ class OnMeshPrefix(object):
 def parse_on_mesh_prefix_result(on_mesh_prefix_list):
     """Parses on-mesh prefix list string and returns an array of `OnMeshPrefix` objects"""
     return [OnMeshPrefix(item) for item in on_mesh_prefix_list.split("\n")[1:-1]]
+
+
+class StatusResult(object):
+    """This object encapsulates a status result
+    """
+
+    def __init__(self, result_text):
+        # Example of expected text:
+        #
+        # `wpan0 => [\n
+        # \t"NCP:State" => "associated"\n
+        # \t"Daemon:Enabled" => true\n
+        # ]'
+        #
+        items = [item.replace("\"", "").split(' => ') for item in result_text.split('\n')[1:-2]]
+        items_dict = {item[0].strip(): item[1].strip() for item in items}
+
+        if len(items_dict) == 15:
+            self._state = items_dict[wpan.WPAN_STATE]
+            self._daemon = items_dict[wpan.WPAN_DAEMON_ENABLED]
+            self._ncp_version = items_dict[wpan.WPAN_NCP_VERSION]
+            self._daemon_version = items_dict[wpan.WPAN_DAEMON_VERSION]
+            self._driver_name = items_dict[wpan.WPAN_DRIVERNAME]
+            self._hardware_address = items_dict[wpan.WPAN_HW_ADDRESS]
+            self._channel = items_dict[wpan.WPAN_CHANNEL]
+            self._node_type = items_dict[wpan.WPAN_NODE_TYPE]
+            self._name = items_dict[wpan.WPAN_NAME]
+            self._xpanid = items_dict[wpan.WPAN_XPANID]
+            self._panid = items_dict[wpan.WPAN_PANID]
+            self._link_local_addr = items_dict[wpan.WPAN_IP6_LINK_LOCAL_ADDRESS]
+            self._mesh_local_addr = items_dict[wpan.WPAN_IP6_MESH_LOCAL_ADDRESS]
+            self._mesh_local_prefix = items_dict[wpan.WPAN_IP6_MESH_LOCAL_PREFIX]
+            self._allow_join = items_dict[wpan.WPAN_NETWORK_ALLOW_JOIN]
+        else:
+            raise ValueError(f"'{result_text}' does not seem to be a valid status result string")
+
+    def __repr__(self):
+        return "ScanResult({})".format(self.__dict__)
