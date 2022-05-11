@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<table id="data" class="table table-striped">
+    <thead>
+    <tr>
+        <th>Network Name</th>
+        <th>Extended PAN ID</th>
+        <th>PAN ID</th>
+        <th>channel</th>
+        <th>Hardware Address</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for user in users %}
+    <tr>
+        <td>{{device._index}}</td>
+        <td>{{device._network_name}}</td>
+        <td>{{device._xpanid}}</td>
+        <td>{{device._panid}}</td>
+        <td>{{device._channel}}</td>
+        <td>{{device._ext_address}}</td>
+        <td>
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-button show-modal" ng-click="showJoinDialog($event, $index, item)">Join</button>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

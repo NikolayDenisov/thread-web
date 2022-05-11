@@ -17,7 +17,7 @@ socketio = SocketIO(app)
 def index():
     scanner = DevBoardNode()
     scan_result = wpan_table_parser.parse_scan_result(scanner.get_active_scan(DEFAULT_PORT))
-    return flask.render_template('index.html', name='index', scan_result=scan_result)
+    return flask.render_template('thread_networks.html', name='index', scan_result=scan_result)
 
 
 @app.route('/settings')
