@@ -3,8 +3,10 @@ import os
 
 import silk.config.defaults as defaults
 import silk.hw.hw_module as hw_module
+from silk.config import wpan_constants as wpan
 from silk.device.netns_base import NetnsController
 from silk.node.wpantund_base import WpantundWpanNode
+from silk.tools import wpan_table_parser
 from silk.utils.network import get_local_ip
 
 
@@ -117,3 +119,15 @@ class DevBoardNode(WpantundWpanNode, NetnsController):
         wpanctl_command += command
         output = self.make_netns_call(wpanctl_command, timeout)
         return output
+
+    def find_ip6_address_with_prefix(self, prefix):
+        """Find an IPv6 address on node matching a given prefix.
+        `prefix` should be an string containing the prefix.
+        Returns a string containing the IPv6 address matching the prefix or
+        empty string if no address found.
+        """
+        if len(prefix) > 2 and prefix[-1] == ":" and prefix[-2] == ":":
+            prefix = prefix[:-1]
+        all_addrs = wpan_table_parser.parse_list(self.get(wpan.WPAN_IP6_ALL_ADDRESSES))
+        matched_addr = [addr for addr in all_addrs if addr.startswith(prefix)]
+        return matched_addr[0] if len(matched_addr) >= 1 else ""
