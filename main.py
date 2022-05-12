@@ -14,7 +14,7 @@ app.config['SECRET_KEY'] = SECRET_KEY
 socketio = SocketIO(app)
 
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
     router = DevBoardNode()
     scan_result = wpan_table_parser.parse_scan_result(router.get_active_scan(DEFAULT_PORT))
@@ -62,7 +62,7 @@ def form():
     return flask.render_template('form.html', name='form')
 
 
-@app.route('/status')
+@app.route('/status', methods=['GET'])
 def status():
     router = DevBoardNode()
     status = router.wpanctl("get", "status", 2)
@@ -74,7 +74,7 @@ def status():
     # ]'
     #
     status_result = wpan_table_parser.StatusResult(status)
-    return flask.render_template('status.html', name='node', status_result=status_result)
+    return flask.render_template('status.html', title='Status', name='node', status_result=status_result)
 
 
 @app.route('/commission')
@@ -82,12 +82,13 @@ def commission():
     return flask.render_template('commission.html', name='commission')
 
 
-@app.route('/neighbors')
+@app.route('/neighbors', methods=['GET'])
 def neighbors():
     router = DevBoardNode()
     neighbor_table_text = router.wpanctl("get", "get " + wpan.WPAN_THREAD_NEIGHBOR_TABLE, 2)
     neighbor_table = wpan_table_parser.parse_neighbor_table_result(neighbor_table_text)
-    return flask.render_template('neighbors.html', name='neighbors', neighbor_table=neighbor_table)
+    return flask.render_template('neighbors.html', title='Neighbors list', name='neighbors',
+                                 neighbor_table=neighbor_table)
 
 
 def main():
