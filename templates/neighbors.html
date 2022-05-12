@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<table id="data" class="table table-striped">
+    <thead>
+    <tr>
+        <th>Extended Address</th>
+        <th>RLOC16</th>
+        <th>IsChild</th>
+        <th>RxOnIdle</th>
+        <th>FTD</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for neighbor in neighbor_table %}
+    <tr>
+        <td>{{neighbor.ext_address}}</td>
+        <td>{{neighbor.rloc16}}</td>
+        <td>{{neighbor._is_child}}</td>
+        <td>{{neighbor._rx_on_idle}}</td>
+        <td>{{neighbor._ftd}}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

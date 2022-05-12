@@ -5,6 +5,7 @@ from flask_socketio import *
 from CONFIG import DEFAULT_PORT
 from CONFIG import SECRET_KEY
 from CONFIG import SERVER_HOST, SERVER_PORT
+from silk.config import wpan_constants as wpan
 from silk.node.DevBoardNode import DevBoardNode
 from silk.tools import wpan_table_parser
 
@@ -17,7 +18,8 @@ socketio = SocketIO(app)
 def index():
     router = DevBoardNode()
     scan_result = wpan_table_parser.parse_scan_result(router.get_active_scan(DEFAULT_PORT))
-    return flask.render_template('thread_networks.html', title='Available Thread Networks', name='index', scan_result=scan_result)
+    return flask.render_template('thread_networks.html', title='Available Thread Networks', name='index',
+                                 scan_result=scan_result)
 
 
 @app.route('/settings')
@@ -78,6 +80,14 @@ def status():
 @app.route('/commission')
 def commission():
     return flask.render_template('commission.html', name='commission')
+
+
+@app.route('/neighbors')
+def neighbors():
+    router = DevBoardNode()
+    neighbor_table_text = router.wpanctl("get", "get " + wpan.WPAN_THREAD_NEIGHBOR_TABLE, 2)
+    neighbor_table = wpan_table_parser.parse_neighbor_table_result(neighbor_table_text)
+    return flask.render_template('neighbors.html', name='neighbors', neighbor_table=neighbor_table)
 
 
 def main():
