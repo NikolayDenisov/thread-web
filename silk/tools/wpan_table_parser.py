@@ -340,6 +340,8 @@ class ScanResult(object):
     def __init__(self, result_text):
 
         items = [item.strip() for item in result_text.split("|")]
+        print()
+        print(f'Scan result {items}')
 
         if len(items) == 8:
             self._type = ScanResult.TYPE_ACTIVE_SCAN
@@ -414,7 +416,9 @@ def parse_scan_result(scan_result):
     3 |       NO | "Silk-PAN-F926"    | 0x3DDA | 11 | E35BFBBBB014A4FF | EAD5AFC58F50D056 |  -49
     Exclude the last item `"` after split(`\n`)
     """
-    print(scan_result)
+    print()
+    print(f'scan_result {scan_result}')
+    print()
     # skip first two lines which are table headers
     return [ScanResult(item) for item in scan_result.strip().split("\n")[2:]]
 
@@ -485,10 +489,17 @@ class OnMeshPrefix(object):
         # `\t"fd00:abba:cafe::       prefix_len:64   origin:user     stable:yes flags:0x31`
         # ` [on-mesh:1 def-route:0 config:0 dhcp:0 slaac:1 pref:1 nd-dns:0 dp:0 prio:med] rloc:0x0000"`
 
+        #TODO: вернуть после обновления ot-ctl
+        # m = re.match(
+        #     r"\t\"([0-9a-fA-F:]+)\s*prefix_len:(\d+)\s+origin:(\w*)\s+stable:(\w*).* \[" +
+        #     r"on-mesh:(\d)\s+def-route:(\d)\s+config:(\d)\s+dhcp:(\d)\s+slaac:(\d)\s+pref:(\d)\s+" +
+        #     r"nd-dns:(\d)\s+dp:(\d)\s+prio:(\w*)\]" +
+        #     r"\s+rloc:(0x[0-9a-fA-F]+)", text)
+        # "fd11:22::              prefix_len:64   origin:user     stable:yes flags:0x33 [on-mesh:1 def-route:1 config:0 dhcp:0 slaac:1 pref:1 prio:med] rloc:0x0000"
         m = re.match(
             r"\t\"([0-9a-fA-F:]+)\s*prefix_len:(\d+)\s+origin:(\w*)\s+stable:(\w*).* \[" +
             r"on-mesh:(\d)\s+def-route:(\d)\s+config:(\d)\s+dhcp:(\d)\s+slaac:(\d)\s+pref:(\d)\s+" +
-            r"nd-dns:(\d)\s+dp:(\d)\s+prio:(\w*)\]" +
+            r"prio:(\w*)\]" +
             r"\s+rloc:(0x[0-9a-fA-F]+)", text)
         wpan_util.verify(m is not None)
         data = m.groups()
@@ -503,10 +514,13 @@ class OnMeshPrefix(object):
         self._dhcp = (data[7] == "1")
         self._slaac = (data[8] == "1")
         self._preferred = (data[9] == "1")
-        self._nd_dns = (data[10] == "1")
-        self._dp = (data[11] == "1")
-        self._priority = (data[12])
-        self._rloc16 = (data[13])
+        #TODO: вернуть после обновления ot-ctl
+        # self._nd_dns = (data[10] == "1")
+        # self._dp = (data[11] == "1")
+        # self._priority = (data[12])
+        # self._rloc16 = (data[13])
+        self._priority = (data[10])
+        self._rloc16 = (data[11])
 
     @property
     def prefix(self):

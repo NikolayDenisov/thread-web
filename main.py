@@ -8,6 +8,10 @@ from CONFIG import SERVER_HOST, SERVER_PORT
 from silk.config import wpan_constants as wpan
 from silk.node.DevBoardNode import DevBoardNode
 from silk.tools import wpan_table_parser
+from silk.node.wpan_node import WpanCredentials
+import random
+
+ML_PREFIX_1 = 'fd00:1::'
 
 app = flask.Flask(__name__, static_folder="static", static_url_path="/static", template_folder="templates")
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -18,6 +22,7 @@ socketio = SocketIO(app)
 def index():
     router = DevBoardNode()
     scan_result = wpan_table_parser.parse_scan_result(router.get_active_scan(DEFAULT_PORT))
+    print(scan_result)
     return flask.render_template('thread_networks.html', title='Available Thread Networks', name='index',
                                  scan_result=scan_result)
 
@@ -57,8 +62,26 @@ def join():
     return flask.render_template('join.html', name='join')
 
 
-@app.route('/form')
+@app.route('/form', methods=['GET', 'POST'])
 def form():
+    device = DevBoardNode()
+    prefixes = wpan_table_parser.parse_on_mesh_prefix_result(device.get(wpan.WPAN_THREAD_ON_MESH_PREFIXES))
+    network_scope = {
+        'networkName': device.get(wpan.WPAN_NAME)[1:-1],
+        'extPanId': device.get(wpan.WPAN_XPANID)[2:],
+        'panId': device.get(wpan.WPAN_PANID),
+        'passphrase': '123456',
+        'networkKey': device.get(wpan.WPAN_KEY)[1:-1],
+        'channel': device.get(wpan.WPAN_CHANNEL),
+        'prefix': prefixes[0].prefix,
+        'defaultRoute': True,
+    }
+    print(network_scope)
+    network_data = WpanCredentials(network_name="OpenThreadDemo{0}".format(random.randint(0, 10)),
+                                   psk="00112233445566778899aabbccdd{0:04x}".format(random.randint(0, 0xffff)),
+                                   channel=random.randint(11, 25),
+                                   fabric_id="{0:06x}dead".format(random.randint(0, 0xffffff)))
+    # device.form(network_data, "router", mesh_local_prefix=ML_PREFIX_1)
     return flask.render_template('form.html', name='form')
 
 
@@ -94,7 +117,7 @@ def neighbors():
 def main():
     logging.basicConfig(level=logging.INFO)
     logging.getLogger("thread-web").setLevel(logging.DEBUG)
-    socketio.run(app=app, host=SERVER_HOST, debug=True, port=SERVER_PORT, use_reloader=False)
+    socketio.run(app=app, host=SERVER_HOST, debug=True, port=SERVER_PORT, use_reloader=True)
 
 
 if __name__ == "__main__":

@@ -136,7 +136,8 @@ class NetnsController(SystemCallManager):
         Format the command so that it will be called in this network namespace.
         Make the system call with a timeout.
         """
-        command = self.construct_netns_command(command)
+        #TODO: fix namespace
+        # command = self.construct_netns_command(command)
         return self.make_system_call_async("netns-exec", command, expect, timeout, field, exact_match)
 
     def link_set(self, interface_name, virtual_eth_peer):

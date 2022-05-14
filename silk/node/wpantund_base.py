@@ -315,7 +315,7 @@ class WpantundWpanNode(wpan_node.WpanNode):
             output = self.wpanctl("scan", "scan -c {}".format(channel), 20)
         else:
             output = self.wpanctl("scan", "scan ", 20)
-        print(output)
+        print(f"output - {output}")
         return output
 
     def get_energy_scan(self, channel=None):
