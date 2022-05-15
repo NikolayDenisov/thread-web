@@ -1,4 +1,5 @@
 import logging
+import random
 
 from flask_socketio import *
 
@@ -7,9 +8,8 @@ from CONFIG import SECRET_KEY
 from CONFIG import SERVER_HOST, SERVER_PORT
 from silk.config import wpan_constants as wpan
 from silk.node.DevBoardNode import DevBoardNode
-from silk.tools import wpan_table_parser
 from silk.node.wpan_node import WpanCredentials
-import random
+from silk.tools import wpan_table_parser
 
 ML_PREFIX_1 = 'fd00:1::'
 
@@ -110,8 +110,10 @@ def neighbors():
     router = DevBoardNode()
     neighbor_table_text = router.wpanctl("get", "get " + wpan.WPAN_THREAD_NEIGHBOR_TABLE, 2)
     neighbor_table = wpan_table_parser.parse_neighbor_table_result(neighbor_table_text)
+    mesh_local_prefix = router.get(wpan.WPAN_IP6_MESH_LOCAL_PREFIX)[1:-1].split("/")[0]
+    IID = "00:ff:fe00:"
     return flask.render_template('neighbors.html', title='Neighbors list', name='neighbors',
-                                 neighbor_table=neighbor_table)
+                                 neighbor_table=neighbor_table, mesh_local_prefix=mesh_local_prefix, IID=IID)
 
 
 def main():

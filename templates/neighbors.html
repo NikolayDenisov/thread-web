@@ -9,6 +9,7 @@
         <th>IsChild</th>
         <th>RxOnIdle</th>
         <th>FTD</th>
+        <th>Mesh-Local Address</th>
     </tr>
     </thead>
     <tbody>
@@ -19,6 +20,7 @@
         <td>{{neighbor._is_child}}</td>
         <td>{{neighbor._rx_on_idle}}</td>
         <td>{{neighbor._ftd}}</td>
+        <td>{{mesh_local_prefix[:-1] + IID + neighbor.rloc16}}</td>
     </tr>
     {% endfor %}
     </tbody>
