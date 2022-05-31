@@ -269,6 +269,10 @@ class AddressCacheEntry(object):
         # We get rid of the first two chars `\t"` and last char `"`, split the rest using whitespace as separator.
         # Then remove any `,` at end of items in the list.
         items = [item[:-1] if item[-1] == "," else item for item in text[2:-1].split()]
+        print()
+        print('items')
+        print(items)
+        print()
 
         # First item in the extended address
         self._address = items[0]
@@ -326,6 +330,11 @@ class AddressCacheEntry(object):
 def parse_address_cache_table_result(addr_cache_table_list):
     """Parses address cache table list string and returns an array of `AddressCacheEntry` objects.
     """
+    for item in addr_cache_table_list.split("\n")[1:-2]:
+        print()
+        print('item')
+        print(f'{item}')
+        print()
     return [AddressCacheEntry(item) for item in addr_cache_table_list.split("\n")[1:-2]]
 
 

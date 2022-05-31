@@ -1,2 +1,5 @@
 flask_socketio
 usbinfo
+Flask-SQLAlchemy
+psycopg2
+pgcopy
