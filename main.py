@@ -10,6 +10,7 @@ from silk.config import wpan_constants as wpan
 from silk.node.DevBoardNode import DevBoardNode
 from silk.node.wpan_node import WpanCredentials
 from silk.tools import wpan_table_parser
+from errors import OTNSCliError
 
 ML_PREFIX_1 = 'fd00:1::'
 
@@ -21,7 +22,7 @@ socketio = SocketIO(app, async_mode='threading')
 @app.route('/', methods=['GET'])
 def index():
     router = DevBoardNode()
-    scan_result = wpan_table_parser.parse_scan_result(router.get_active_scan(DEFAULT_PORT))
+    scan_result = wpan_table_parser.parse_scan_result(router.get_active_scan())
     return flask.render_template('thread_networks.html', title='Available Thread Networks', name='index',
                                  scan_result=scan_result)
 
@@ -86,16 +87,8 @@ def form():
 @app.route('/status', methods=['GET'])
 def status():
     router = DevBoardNode()
-    status = router.wpanctl("get", "status", 2)
-    # Example of expected text:
-    #
-    # `wpan0 => [\n
-    # \t"NCP:State" => "associated"\n
-    # \t"Daemon:Enabled" => true\n
-    # ]'
-    #
-    status_result = wpan_table_parser.StatusResult(status)
-    return flask.render_template('status.html', title='Status', name='node', status_result=status_result)
+    status = router.handle_status_request()
+    return flask.render_template('status.html', title='Status', name='node', status=status)
 
 
 @app.route('/commission')

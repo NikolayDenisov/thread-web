@@ -71,6 +71,8 @@ WPAN_THREAD_STABLE_NETWORK_DATA_VERSION = "Thread:StableNetworkDataVersion"
 WPAN_THREAD_PREFERRED_ROUTER_ID = "Thread:PreferredRouterID"
 WPAN_THREAD_COMMISSIONER_ENABLED = "Thread:Commissioner:Enabled"
 WPAN_THREAD_DEVICE_MODE = "Thread:DeviceMode"
+WPAN_THREAD_VERSION = "Thread:Version"
+WPAN_THREAD_VERSION_API = "Thread:Version API"
 WPAN_THREAD_OFF_MESH_ROUTES = "Thread:OffMeshRoutes"
 WPAN_THREAD_ON_MESH_PREFIXES = "Thread:OnMeshPrefixes"
 WPAN_THREAD_ROUTER_ROLE_ENABLED = "Thread:RouterRole:Enabled"
@@ -100,6 +102,7 @@ WPAN_NCP_COUNTER_ALL_MAC = "NCP:Counter:AllMac"
 WPAN_NCP_COUNTER_ALL_MAC_ASVALMAP = "NCP:Counter:AllMac:AsValMap"
 WPAN_NCP_RSSI = "NCP:RSSI"
 WPAN_NCP_STATE = "NCP:State"
+WPAN_RCP_STATE = "NRP:State"
 WPAN_NCP_COUNTER_TX_ERR_CCA = "NCP:Counter:TX_ERR_CCA"
 WPAN_NCP_COUNTER_TX_IP_DROPPED = "NCP:Counter:TX_IP_DROPPED"
 WPAN_NCP_COUNTER_TX_PKT_ACKED = "NCP:Counter:TX_PKT_ACKED"
@@ -140,7 +143,7 @@ WPAN_CHANNEL_MANAGER_AUTO_SELECT_INTERVAL = "ChannelManager:AutoSelect:Interval"
 WPAN_CHANNEL_MANAGER_SUPPORTED_CHANNEL_MASK = "ChannelManager:SupportedChannelMask"
 WPAN_CHANNEL_MANAGER_FAVORED_CHANNEL_MASK = "ChannelManager:FavoredChannelMask"
 
-#-------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------------
 # Valid state values
 
 STATE_UNINITIALIZED = "\"uninitialized\""
@@ -156,21 +159,21 @@ STATE_ISOLATED = "\"associated:no-parent\""
 STATE_NETWAKE_ASLEEP = "\"associated:netwake-asleep\""
 STATE_NETWAKE_WAKING = "\"associated:netwake-waking\""
 
-#--------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------------------
 # Address Cache Table Entry States
 
 ADDRESS_CACHE_ENTRY_STATE_CACHED = "cached"
 ADDRESS_CACHE_ENTRY_STATE_SNOOPED = "snooped"
 ADDRESS_CACHE_ENTRY_STATE_QUERY = "query"
 ADDRESS_CACHE_ENTRY_STATE_RETRY_QUERY = "retry-query"
-#--------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------------------
 # MCU Power state from `WPAN_NCP_MCU_POWER_STATE`
 
 MCU_POWER_STATE_ON = "\"on\""
 MCU_POWER_STATE_LOW_POWER = "\"low-power\""
 MCU_POWER_STATE_OFF = "\"off\""
 
-#--------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------------------
 # Node types (from `WPAN_NODE_TYPE` property)
 
 NODE_TYPE_UNKNOWN = "\"unknown\""
@@ -181,20 +184,20 @@ NODE_TYPE_SLEEPY_END_DEVICE = "\"sleepy-end-device\""
 NODE_TYPE_COMMISSIONER = "\"commissioner\""
 NODE_TYPE_NEST_LURKER = "\"nl-lurker\""
 
-#--------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------------------
 # Node types used by `Node.join()`
 
 JOIN_TYPE_ROUTER = "r"
 JOIN_TYPE_END_DEVICE = "e"
 JOIN_TYPE_SLEEPY_END_DEVICE = "s"
 
-#--------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------------------
 # Bit Flags for Thread Device Mode `WPAN_THREAD_DEVICE_MODE`
 
 THREAD_MODE_FLAG_FULL_NETWORK_DATA = (1 << 0)
 THREAD_MODE_FLAG_FULL_THREAD_DEV = (1 << 1)
 THREAD_MODE_FLAG_RX_ON_WHEN_IDLE = (1 << 3)
 
-#--------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------------------
 # thread roles
 ROLES = {"router": 2, "end-node": 3, "sleepy-end-device": 4, 2: "router", 3: "end-node", 4: "sleepy-end-device"}

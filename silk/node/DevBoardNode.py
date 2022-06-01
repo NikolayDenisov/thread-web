@@ -8,6 +8,9 @@ from silk.device.netns_base import NetnsController
 from silk.node.wpantund_base import WpantundWpanNode
 from silk.tools import wpan_table_parser
 from silk.utils.network import get_local_ip
+from silk.config import wpan_constants
+from errors import OTNSCliError
+from silk.postprocessing import ip
 
 
 class DevBoardNode(WpantundWpanNode, NetnsController):
@@ -117,8 +120,10 @@ class DevBoardNode(WpantundWpanNode, NetnsController):
         """
         wpanctl_command = defaults.WPANCTL_PATH + f" -I {self.netns} "
         wpanctl_command += command
-        output = self.make_netns_call(wpanctl_command, timeout)
-        return output
+        output = self.make_netns_call(wpanctl_command, timeout).strip().split('\r\n')
+        if output[-1] != "Done":
+            raise OTNSCliError(output[-1])
+        return "\r\n".join(output[:-1])
 
     def find_ip6_address_with_prefix(self, prefix):
         """Find an IPv6 address on node matching a given prefix.
@@ -131,3 +136,40 @@ class DevBoardNode(WpantundWpanNode, NetnsController):
         all_addrs = wpan_table_parser.parse_list(self.get(wpan.WPAN_IP6_ALL_ADDRESSES))
         matched_addr = [addr for addr in all_addrs if addr.startswith(prefix)]
         return matched_addr[0] if len(matched_addr) >= 1 else ""
+
+    def handle_status_request(self):
+        networkInfo = {}
+        networkInfo[wpan_constants.WPAN_RCP_STATE] = self.wpanctl("get", "state", 1)
+        networkInfo[wpan_constants.WPAN_THREAD_VERSION] = self.wpanctl("get", "version", 1)
+        networkInfo[wpan_constants.WPAN_THREAD_VERSION_API] = self.wpanctl("get", "version api", 1)
+        networkInfo["RCP:EUI64"] = self.wpanctl("get", "eui64", 1)
+        networkInfo["RCP:Channel"] = self.wpanctl("get", "channel", 1)
+        networkInfo["RCP:TxPower"] = self.wpanctl("get", "txpower", 1)
+        networkInfo["Network:Name"] = self.wpanctl("get", "networkname", 1)
+        networkInfo["OpenThread:Version"] = self.wpanctl("get", "version", 1)
+        networkInfo["Network:XPANID"] = self.wpanctl("get", "extpanid", 1)
+        networkInfo["Network:PANID"] = self.wpanctl("get", "panid", 1)
+        networkInfo["Network:PartitionID"] = self.wpanctl("get", "partitionid", 1)
+        kMeshLocalAddressTokenLocator = "0:ff:fe00:"
+        localAddressToken = "fd"
+        linkLocalAddressToken = "fe80"
+        dataset_dict = {}
+        dataset = self.wpanctl("get", "dataset active", 1)
+        dataset_list = [i for i in dataset.split('\n')][1:-1]
+        for j in dataset_list:
+            k, v = j.split(':', 1)
+            dataset_dict[k] = v.strip()
+        networkInfo[wpan_constants.WPAN_IP6_MESH_LOCAL_PREFIX] = dataset_dict['Mesh Local Prefix']
+        ipaddrs = self.wpanctl("get", "ipaddr", 1).split()
+        for ipaddr in ipaddrs:
+            if ipaddr.find(linkLocalAddressToken) != -1:
+                networkInfo["IPv6:LinkLocalAddress"] = ipaddr
+            elif ipaddr.find(kMeshLocalAddressTokenLocator):
+                if not ipaddr.find(networkInfo[wpan_constants.WPAN_IP6_MESH_LOCAL_PREFIX].replace('::/64', '')):
+                    networkInfo["IPv6:MeshLocalAddress"] = ipaddr
+                    continue
+                if ipaddr.find(localAddressToken):
+                    networkInfo["IPv6:GlobalAddress"] = ipaddr
+                else:
+                    networkInfo["IPv6:LocalAddress"] = ipaddr
+        return networkInfo

@@ -2,61 +2,11 @@
 
 {% block content %}
 <table id="status-table" class="table table-striped">
+    {% for key, value in status.items() %}
     <tr>
-        <th>Config:NCP:DriverName</th>
-        <td>{{status_result._driver_name}}</td>
+        <th>{{key}}</th>
+        <td>{{value}}</td>
     </tr>
-    <tr>
-        <th>Daemon:Enabled</th>
-        <td>{{status_result._daemon}}</td>
-    </tr>
-    <tr>
-        <th>Daemon:Version</th>
-        <td>{{status_result._daemon_version}}</td>
-    </tr>
-    <tr>
-        <th>Link-Local Address (LLA)</th>
-        <td>{{status_result._link_local_addr}}</td>
-    </tr>
-    <tr>
-        <th>Mesh-Local EID (ML-EID)</th>
-        <td>{{status_result._mesh_local_addr}}</td>
-    </tr>
-    <tr>
-        <th>Mesh-Local Prefix</th>
-        <td>{{status_result._mesh_local_prefix}}</td>
-    </tr>
-    <tr>
-        <th>Channel</th>
-        <td>{{status_result._channel}}</td>
-    </tr>
-    <tr>
-        <th>HardwareAddress</th>
-        <td>{{status_result._hardware_address}}</td>
-    </tr>
-    <tr>
-        <th>State</th>
-        <td>{{status_result._state}}</td>
-    </tr>
-    <tr>
-        <th>Version</th>
-        <td>{{status_result._ncp_version}}</td>
-    </tr>
-    <tr>
-        <th>Network Name</th>
-        <td>{{status_result._name}}</td>
-    </tr>
-    <tr>
-        <th>NodeType</th>
-        <td>{{status_result._node_type}}</td>
-    </tr>
-    <tr>
-        <th>PANID</th>
-        <td>{{status_result._panid}}</td>
-    </tr>
-    <tr>
-        <th>XPANID</th>
-        <td>{{status_result._xpanid}}</td>
-    </tr>
+    {% endfor %}
 </table>
 {% endblock %}

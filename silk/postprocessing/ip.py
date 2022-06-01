@@ -37,10 +37,8 @@ def ipv6_address_reformat(addr):
 
 def ipv6_address_get_prefix(addr):
     ret = None
-
     if len(addr) == 39:
         ret = addr[:15]
-
     return ret
 
 
@@ -55,20 +53,16 @@ def ipv6_address_get_iid(addr):
 
 def ipv6_address_get_subnet(addr):
     ret = None
-
     if len(addr) == 39:
         ret = addr[15:19]
-
     return ret
 
 
 def lla_to_hwaddr(lla):
     hwaddr = None
-
     iid = ipv6_address_get_iid(lla)
     if iid:
         hwaddr = mp_hwaddr.hwaddr_from_iid(iid)
-
     return hwaddr
 
 
@@ -84,29 +78,22 @@ def ipv6_assemble(prefix, subnet, iid):
 
     prefix = prefix.replace(":", "")
     iid = iid.replace(":", "")
-
     if len(prefix) != 12:
         raise ValueError("prefix must be length 12, %u given" % len(prefix))
-
     if len(subnet) != 4:
         raise ValueError("subnet must be length 4, %u given" % len(subnet))
-
     if len(iid) != 16:
         # QK TODO
         print("iid={}".format(iid))
         raise ValueError("iid must be length 16, %u given" % len(iid))
-
     lower64 = int(iid, 16) | (1 << 57)
-
     addr = [prefix, subnet, "%016x" % lower64]
     # clean up input strings
     addr = [x.strip().replace("0x", "") for x in addr]
     addr = [x.replace(":", "") for x in addr]
-
     # Join and Insert ":"s
     addr = "".join(addr)
     addr = ":".join(re.findall(r"[0-9A-Fa-f]{4}", addr))
-
     return addr
 
 
