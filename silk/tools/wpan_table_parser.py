@@ -16,10 +16,10 @@ import re
 
 from . import wpan_util
 from silk.config import wpan_constants as wpan
+from errors import OTNSCliError
 
 
 def is_associated(sed):
-    print(sed.getprop(wpan.WPAN_STATE))
     return sed.getprop(wpan.WPAN_STATE) == wpan.STATE_ASSOCIATED
 
 
@@ -269,11 +269,6 @@ class AddressCacheEntry(object):
         # We get rid of the first two chars `\t"` and last char `"`, split the rest using whitespace as separator.
         # Then remove any `,` at end of items in the list.
         items = [item[:-1] if item[-1] == "," else item for item in text[2:-1].split()]
-        print()
-        print('items')
-        print(items)
-        print()
-
         # First item in the extended address
         self._address = items[0]
         self._rloc16 = int(items[2], 16)
@@ -330,11 +325,6 @@ class AddressCacheEntry(object):
 def parse_address_cache_table_result(addr_cache_table_list):
     """Parses address cache table list string and returns an array of `AddressCacheEntry` objects.
     """
-    for item in addr_cache_table_list.split("\n")[1:-2]:
-        print()
-        print('item')
-        print(f'{item}')
-        print()
     return [AddressCacheEntry(item) for item in addr_cache_table_list.split("\n")[1:-2]]
 
 
@@ -347,30 +337,23 @@ class ScanResult(object):
     TYPE_ENERGY_SCAN = "energy-scan"
 
     def __init__(self, result_text):
-
         items = [item.strip() for item in result_text.split("|")]
-        print()
-        print(f'Scan result {items}')
-
-        if len(items) == 8:
+        if len(items) == 7:
             self._type = ScanResult.TYPE_ACTIVE_SCAN
-            self._index = items[0]
-            self._joinable = items[1] == "YES"
-            self._network_name = items[2][1:-1]
-            self._panid = items[3]
-            self._channel = items[4]
-            self._xpanid = items[5]
-            self._ext_address = items[6]
-            self._rssi = items[7]
-        elif len(items) == 7:
-            self._type = ScanResult.TYPE_DISCOVERY_SCAN
-            self._index = items[0]
-            self._network_name = items[1][1:-1]
-            self._panid = items[2]
+            self._panid = items[1]
+            self._mac = items[2]
             self._channel = items[3]
-            self._xpanid = items[4]
-            self._ext_address = items[5]
-            self._rssi = items[6]
+            self._dbm = items[4]
+            self._lqi = items[5]
+        elif len(items) == 9:
+            self._type = ScanResult.TYPE_DISCOVERY_SCAN
+            self._network_name = items[1][1:-1]
+            self._xpanid = items[2]
+            self._panid = items[3]
+            self._mac = items[4]
+            self._channel = items[5]
+            self._dbm = items[6]
+            self._lqi = items[6]
         elif len(items) == 2:
             self._type = ScanResult.TYPE_ENERGY_SCAN
             self._channel = items[0]
@@ -381,10 +364,6 @@ class ScanResult(object):
     @property
     def type(self):
         return self._type
-
-    @property
-    def joinable(self):
-        return self._joinable
 
     @property
     def network_name(self):
@@ -403,12 +382,12 @@ class ScanResult(object):
         return self._xpanid
 
     @property
-    def ext_address(self):
-        return self._ext_address
+    def mac(self):
+        return self._mac
 
     @property
-    def rssi(self):
-        return self._rssi
+    def dbm(self):
+        return self._dbm
 
     def __repr__(self):
         return "ScanResult({})".format(self.__dict__)
@@ -418,18 +397,19 @@ def parse_scan_result(scan_result):
     """
     Parses scan result string and returns an array of `ScanResult` objects
     scan result is a string like:
-      | Joinable | NetworkName        | PAN ID | Ch | XPanID           | HWAddr           | RSSI
-    --+----------+--------------------+--------+----+------------------+------------------+------
-    1 |       NO | "SILK-EDD6"        | 0xED69 | 11 | AFA702E6A80E008E | D266199DD2D5FD04 |  -31
-    2 |       NO | "Silk-PAN-8ACE"    | 0x0CE2 | 11 | 647A2248881784BD | 6A54247406E3CA3C |  -56
-    3 |       NO | "Silk-PAN-F926"    | 0x3DDA | 11 | E35BFBBBB014A4FF | EAD5AFC58F50D056 |  -49
-    Exclude the last item `"` after split(`\n`)
+    | PAN  | MAC Address      | Ch | dBm | LQI |
+    +------+------------------+----+-----+-----+
+    | 1234 | 3a9bb80f09a03ca5 | 15 | -67 | 104 |
+    Done
     """
-    print()
-    print(f'scan_result {scan_result}')
-    print()
     # skip first two lines which are table headers
-    return [ScanResult(item) for item in scan_result.strip().split("\n")[2:]]
+    # check last line as status
+    output = scan_result.strip().split("\n")[2:]
+    if output[-1] == 'Done':
+        return [ScanResult(item) for item in output[:-1]]
+    elif output[-1].startswith('Error: '):
+        raise OTNSCliError(output[-1])
+    return
 
 
 def is_in_scan_result(node, scan_results):
@@ -498,17 +478,10 @@ class OnMeshPrefix(object):
         # `\t"fd00:abba:cafe::       prefix_len:64   origin:user     stable:yes flags:0x31`
         # ` [on-mesh:1 def-route:0 config:0 dhcp:0 slaac:1 pref:1 nd-dns:0 dp:0 prio:med] rloc:0x0000"`
 
-        #TODO: вернуть после обновления ot-ctl
-        # m = re.match(
-        #     r"\t\"([0-9a-fA-F:]+)\s*prefix_len:(\d+)\s+origin:(\w*)\s+stable:(\w*).* \[" +
-        #     r"on-mesh:(\d)\s+def-route:(\d)\s+config:(\d)\s+dhcp:(\d)\s+slaac:(\d)\s+pref:(\d)\s+" +
-        #     r"nd-dns:(\d)\s+dp:(\d)\s+prio:(\w*)\]" +
-        #     r"\s+rloc:(0x[0-9a-fA-F]+)", text)
-        # "fd11:22::              prefix_len:64   origin:user     stable:yes flags:0x33 [on-mesh:1 def-route:1 config:0 dhcp:0 slaac:1 pref:1 prio:med] rloc:0x0000"
         m = re.match(
             r"\t\"([0-9a-fA-F:]+)\s*prefix_len:(\d+)\s+origin:(\w*)\s+stable:(\w*).* \[" +
             r"on-mesh:(\d)\s+def-route:(\d)\s+config:(\d)\s+dhcp:(\d)\s+slaac:(\d)\s+pref:(\d)\s+" +
-            r"prio:(\w*)\]" +
+            r"nd-dns:(\d)\s+dp:(\d)\s+prio:(\w*)\]" +
             r"\s+rloc:(0x[0-9a-fA-F]+)", text)
         wpan_util.verify(m is not None)
         data = m.groups()
@@ -523,11 +496,10 @@ class OnMeshPrefix(object):
         self._dhcp = (data[7] == "1")
         self._slaac = (data[8] == "1")
         self._preferred = (data[9] == "1")
-        #TODO: вернуть после обновления ot-ctl
-        # self._nd_dns = (data[10] == "1")
-        # self._dp = (data[11] == "1")
-        # self._priority = (data[12])
-        # self._rloc16 = (data[13])
+        self._nd_dns = (data[10] == "1")
+        self._dp = (data[11] == "1")
+        self._priority = (data[12])
+        self._rloc16 = (data[13])
         self._priority = (data[10])
         self._rloc16 = (data[11])
 

@@ -312,7 +312,7 @@ class WpantundWpanNode(wpan_node.WpanNode):
         """Scan and Return list of other networks that have been seen.
         """
         if channel:
-            output = self.wpanctl("scan", "scan -c {}".format(channel), 20)
+            output = self.wpanctl("scan", "scan".format(channel), 20)
         else:
             output = self.wpanctl("scan", "scan ", 20)
         print(f"output - {output}")

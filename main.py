@@ -15,14 +15,13 @@ ML_PREFIX_1 = 'fd00:1::'
 
 app = flask.Flask(__name__, static_folder="static", static_url_path="/static", template_folder="templates")
 app.config['SECRET_KEY'] = SECRET_KEY
-socketio = SocketIO(app)
+socketio = SocketIO(app, async_mode='threading')
 
 
 @app.route('/', methods=['GET'])
 def index():
     router = DevBoardNode()
     scan_result = wpan_table_parser.parse_scan_result(router.get_active_scan(DEFAULT_PORT))
-    print(scan_result)
     return flask.render_template('thread_networks.html', title='Available Thread Networks', name='index',
                                  scan_result=scan_result)
 
@@ -76,7 +75,6 @@ def form():
         'prefix': prefixes[0].prefix,
         'defaultRoute': True,
     }
-    print(network_scope)
     network_data = WpanCredentials(network_name="OpenThreadDemo{0}".format(random.randint(0, 10)),
                                    psk="00112233445566778899aabbccdd{0:04x}".format(random.randint(0, 0xffff)),
                                    channel=random.randint(11, 25),
@@ -114,11 +112,7 @@ def neighbors():
     IID = "00:ff:fe00:"
 
     addr_cache_table = device.wpanctl("get", "get " + wpan.WPAN_THREAD_ADDRESS_CACHE_TABLE, 2)
-    print()
-    print(addr_cache_table)
-    print()
     addr_cache_table = wpan_table_parser.parse_address_cache_table_result(addr_cache_table)
-    print(addr_cache_table)
     return flask.render_template('neighbors.html', title='Neighbors list', name='neighbors',
                                  neighbor_table=neighbor_table, mesh_local_prefix=mesh_local_prefix, IID=IID)
 
