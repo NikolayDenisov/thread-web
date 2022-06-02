@@ -144,26 +144,14 @@ class NeighborEntry(object):
     """
 
     def __init__(self, text):
-        # Example of expected text:
-        #
-        # `\t"5AC95ED4646D6565, RLOC16:9403, LQIn:3, AveRssi:-20, LastRssi:-20, Age:0, LinkFC:8, MleFC:0, `
-        # `IsChild:yes, RxOnIdle:no, FTD:no, SecDataReq:yes, FullNetData:yes"`
-        #
-
-        # We get rid of the first two chars `\t"` and last char `"`, split the rest using whitespace as separator.
-        # Then remove any `,` at end of items in the list.
-        items = [item[:-1] if item[-1] == "," else item for item in text[2:-1].split()]
-
+        items = [item.strip() for item in text.split("|")]
         # First item in the extended address
-        self._ext_address = items[0]
-
-        # Convert the rest into a dictionary by splitting the text using `:` as separator
-        items_dict = {item.split(":")[0]: item.split(":")[1] for item in items[1:]}
-
-        self._rloc16 = items_dict["RLOC16"]
-        self._is_child = (items_dict["IsChild"] == "yes")
-        self._rx_on_idle = (items_dict["RxOnIdle"] == "yes")
-        self._ftd = (items_dict["FTD"] == "yes")
+        self._role = items[1]
+        self._rloc16 = items[2]
+        self._age = items[3]
+        self._avg_rssi = items[4]
+        self._last_rssi = items[5]
+        self._ext_mac = items[-2]
 
     @property
     def ext_address(self):
@@ -197,10 +185,7 @@ def parse_neighbor_table_result(neighbor_table_list):
     # skip first two lines which are table headers
     # check last line as status
     output = neighbor_table_list.strip().split("\n")[2:]
-    if output[-1] == 'Done':
-        return [NeighborEntry(item) for item in output[:-1]]
-    elif output[-1].startswith('Error: '):
-        raise OTNSCliError(output[-1])
+    return [NeighborEntry(item) for item in output]
 
 
 class RouterTableEntry(object):
@@ -412,10 +397,8 @@ def parse_scan_result(scan_result):
     """
     # skip first two lines which are table headers
     # check last line as status
-
     output = scan_result.strip().split("\n")[2:]
     return [ScanResult(item) for item in output]
-
 
 
 def is_in_scan_result(node, scan_results):

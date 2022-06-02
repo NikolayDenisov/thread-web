@@ -4,23 +4,23 @@
 <table id="data" class="table table-striped">
     <thead>
     <tr>
-        <th>Extended Address</th>
+        <th>Role</th>
         <th>RLOC16</th>
-        <th>IsChild</th>
-        <th>RxOnIdle</th>
-        <th>FTD</th>
-        <th>Mesh-Local Address</th>
+        <th>Age</th>
+        <th>Avg RSSI</th>
+        <th>Last RSSI</th>
+        <th>Extended MAC</th>
     </tr>
     </thead>
     <tbody>
     {% for neighbor in neighbor_table %}
     <tr>
-        <td>{{neighbor.ext_address}}</td>
-        <td>{{neighbor.rloc16}}</td>
-        <td>{{neighbor._is_child}}</td>
-        <td>{{neighbor._rx_on_idle}}</td>
-        <td>{{neighbor._ftd}}</td>
-        <td>{{mesh_local_prefix[:-1] + IID + neighbor.rloc16}}</td>
+        <td>{{neighbor._role}}</td>
+        <td>{{neighbor._rloc16}}</td>
+        <td>{{neighbor._age}}</td>
+        <td>{{neighbor._avg_rssi}}</td>
+        <td>{{neighbor._last_rssi}}</td>
+        <td>{{neighbor._ext_mac}}</td>
     </tr>
     {% endfor %}
     </tbody>

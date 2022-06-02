@@ -100,14 +100,12 @@ def commission():
 def neighbors():
     device = DevBoardNode()
     neighbor_table_text = device.wpanctl("get", "neighbor table", 2)
+    print()
+    print(neighbor_table_text)
+    print()
     neighbor_table = wpan_table_parser.parse_neighbor_table_result(neighbor_table_text)
-    mesh_local_prefix = device.get(wpan.WPAN_IP6_MESH_LOCAL_PREFIX)[1:-1].split("/")[0]
-    IID = "00:ff:fe00:"
-
-    addr_cache_table = device.wpanctl("get", "get " + wpan.WPAN_THREAD_ADDRESS_CACHE_TABLE, 2)
-    addr_cache_table = wpan_table_parser.parse_address_cache_table_result(addr_cache_table)
     return flask.render_template('neighbors.html', title='Neighbors list', name='neighbors',
-                                 neighbor_table=neighbor_table, mesh_local_prefix=mesh_local_prefix, IID=IID)
+                                 neighbor_table=neighbor_table, )
 
 
 def main():
