@@ -99,7 +99,7 @@ def commission():
 @app.route('/neighbors', methods=['GET'])
 def neighbors():
     device = DevBoardNode()
-    neighbor_table_text = device.wpanctl("get", "get " + wpan.WPAN_THREAD_NEIGHBOR_TABLE, 2)
+    neighbor_table_text = device.wpanctl("get", "neighbor table", 2)
     neighbor_table = wpan_table_parser.parse_neighbor_table_result(neighbor_table_text)
     mesh_local_prefix = device.get(wpan.WPAN_IP6_MESH_LOCAL_PREFIX)[1:-1].split("/")[0]
     IID = "00:ff:fe00:"

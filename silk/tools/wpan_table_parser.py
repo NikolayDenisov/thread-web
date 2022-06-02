@@ -187,12 +187,20 @@ class NeighborEntry(object):
 
 
 def parse_neighbor_table_result(neighbor_table_list):
-    """Parses neighbor table list string and returns an array of `NeighborEntry` objects.
     """
-    items = neighbor_table_list.split("\n")[1:-1]
-    if items and "]" in items[-1]:
-        items.pop()
-    return [NeighborEntry(item) for item in items]
+    Parses neighbor table list string and returns an array of `NeighborEntry` objects.
+    neighbor table is a string like:
+    | Role | RLOC16 | Age | Avg RSSI | Last RSSI |R|D|N| Extended MAC     |
+    +------+--------+-----+----------+-----------+-+-+-+------------------+
+    |   R  | 0xbc00 |  38 |      -66 |       -66 |1|1|1| 3a9bb80f09a03ca5 |
+    """
+    # skip first two lines which are table headers
+    # check last line as status
+    output = neighbor_table_list.strip().split("\n")[2:]
+    if output[-1] == 'Done':
+        return [NeighborEntry(item) for item in output[:-1]]
+    elif output[-1].startswith('Error: '):
+        raise OTNSCliError(output[-1])
 
 
 class RouterTableEntry(object):

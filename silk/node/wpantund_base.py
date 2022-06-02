@@ -312,17 +312,16 @@ class WpantundWpanNode(wpan_node.WpanNode):
         """Scan and Return list of other networks that have been seen.
         """
         if channel:
-            output = self.wpanctl("scan", "scan".format(channel), 20)
+            output = self.wpanctl("scan", "scan {}".format(channel), 20)
         else:
-            output = self.wpanctl("scan", "scan ", 20)
-        print(f"output - {output}")
+            output = self.wpanctl("scan", "scan", 20)
         return output
 
     def get_energy_scan(self, channel=None):
         if channel:
-            output = self.wpanctl("scan", "scan -e -c {}".format(channel), 20)
+            output = self.wpanctl("scan", "scan {}".format(channel), 20)
         else:
-            output = self.wpanctl("scan", "scan -e", 20)
+            output = self.wpanctl("scan", "scan", 20)
         return output
 
     def get_discover_scan(self, channel=None, joiner_only=False, enable_filtering=False, panid_filter=None):
