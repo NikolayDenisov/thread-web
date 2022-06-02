@@ -412,12 +412,10 @@ def parse_scan_result(scan_result):
     """
     # skip first two lines which are table headers
     # check last line as status
+
     output = scan_result.strip().split("\n")[2:]
-    if output[-1] == 'Done':
-        return [ScanResult(item) for item in output[:-1]]
-    elif output[-1].startswith('Error: '):
-        raise OTNSCliError(output[-1])
-    return
+    return [ScanResult(item) for item in output]
+
 
 
 def is_in_scan_result(node, scan_results):
